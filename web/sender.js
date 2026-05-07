@@ -1,6 +1,7 @@
 const statusEl = document.getElementById('status');
 const logEl = document.getElementById('log');
 const roomEl = document.getElementById('room');
+const signalEl = document.getElementById('signal');
 const connectBtn = document.getElementById('connect');
 const startBtn = document.getElementById('start');
 const stopBtn = document.getElementById('stop');
@@ -9,6 +10,13 @@ let ws;
 let stream;
 const pcs = new Map();
 const receiverIds = new Set();
+const rtcConfig = {
+  iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }],
+};
+
+function isGitHubPagesHost(hostname) {
+  return /(^|\.)github\.io$/i.test(hostname);
+}
 
 function setStatus(status) {
   statusEl.textContent = status;
@@ -22,11 +30,24 @@ function send(data) {
   ws.send(JSON.stringify(data));
 }
 
+function getDefaultSignalUrl() {
+  const signalFromQuery = new URLSearchParams(location.search).get('signal');
+  if (signalFromQuery) return signalFromQuery;
+
+  const signalFromStorage = localStorage.getItem('signal_url');
+  if (signalFromStorage) return signalFromStorage;
+
+  if (isGitHubPagesHost(location.hostname)) return '';
+  return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
+}
+
+signalEl.value = getDefaultSignalUrl();
+
 async function setupPeer(receiverId) {
   if (!stream) return;
   if (pcs.has(receiverId)) return pcs.get(receiverId);
 
-  const pc = new RTCPeerConnection();
+  const pc = new RTCPeerConnection(rtcConfig);
   pcs.set(receiverId, pc);
 
   stream.getTracks().forEach((track) => pc.addTrack(track, stream));
@@ -47,8 +68,16 @@ async function setupPeer(receiverId) {
 connectBtn.onclick = () => {
   const room = roomEl.value.trim();
   if (!room) return;
+  const signalUrl = signalEl.value.trim();
+  if (!signalUrl) {
+    setStatus('missing_signal_url');
+    log('Enter signaling URL, for example ws://<ip>:8080 or wss://<host>');
+    return;
+  }
 
-  ws = new WebSocket(`ws://${location.host}`);
+  localStorage.setItem('signal_url', signalUrl);
+
+  ws = new WebSocket(signalUrl);
 
   ws.onopen = () => {
     send({ type: 'join', room, role: 'sender' });

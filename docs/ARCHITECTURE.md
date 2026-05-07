@@ -14,6 +14,7 @@
 4. Server is used for signaling only.
 
 ## Scope
-- 100% free, self-hosted LAN workflow.
-- Same Wi-Fi/LAN required.
-- NAT traversal and cloud relay are intentionally out of scope for MVP.
+- 100% free, self-hosted signaling workflow.
+- Local network works out of the box.
+- GitHub Pages is supported for static web deployment (`/web`).
+- TURN relay is still out of scope for MVP.

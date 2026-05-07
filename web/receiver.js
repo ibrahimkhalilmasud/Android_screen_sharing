@@ -1,12 +1,20 @@
 const statusEl = document.getElementById('status');
 const logEl = document.getElementById('log');
 const roomEl = document.getElementById('room');
+const signalEl = document.getElementById('signal');
 const connectBtn = document.getElementById('connect');
 const videoEl = document.getElementById('video');
 
 let ws;
 let senderId;
 let pc;
+const rtcConfig = {
+  iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }],
+};
+
+function isGitHubPagesHost(hostname) {
+  return /(^|\.)github\.io$/i.test(hostname);
+}
 
 function setStatus(status) {
   statusEl.textContent = status;
@@ -20,12 +28,25 @@ function send(data) {
   ws.send(JSON.stringify(data));
 }
 
+function getDefaultSignalUrl() {
+  const signalFromQuery = new URLSearchParams(location.search).get('signal');
+  if (signalFromQuery) return signalFromQuery;
+
+  const signalFromStorage = localStorage.getItem('signal_url');
+  if (signalFromStorage) return signalFromStorage;
+
+  if (isGitHubPagesHost(location.hostname)) return '';
+  return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
+}
+
+signalEl.value = getDefaultSignalUrl();
+
 async function rebuildPeerConnection() {
   if (pc) {
     pc.close();
   }
 
-  pc = new RTCPeerConnection();
+  pc = new RTCPeerConnection(rtcConfig);
 
   pc.ontrack = (event) => {
     videoEl.srcObject = event.streams[0];
@@ -43,8 +64,16 @@ async function rebuildPeerConnection() {
 connectBtn.onclick = async () => {
   const room = roomEl.value.trim();
   if (!room) return;
+  const signalUrl = signalEl.value.trim();
+  if (!signalUrl) {
+    setStatus('missing_signal_url');
+    log('Enter signaling URL, for example ws://<ip>:8080 or wss://<host>');
+    return;
+  }
 
-  ws = new WebSocket(`ws://${location.host}`);
+  localStorage.setItem('signal_url', signalUrl);
+
+  ws = new WebSocket(signalUrl);
 
   ws.onopen = () => {
     send({ type: 'join', room, role: 'receiver' });
