@@ -11,8 +11,12 @@ let stream;
 const pcs = new Map();
 const receiverIds = new Set();
 const rtcConfig = {
-  iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }],
+  iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }],
 };
+
+function isGitHubPagesHost(hostname) {
+  return /(^|\.)github\.io$/i.test(hostname);
+}
 
 function setStatus(status) {
   statusEl.textContent = status;
@@ -33,7 +37,7 @@ function getDefaultSignalUrl() {
   const signalFromStorage = localStorage.getItem('signal_url');
   if (signalFromStorage) return signalFromStorage;
 
-  if (location.hostname.endsWith('github.io')) return '';
+  if (isGitHubPagesHost(location.hostname)) return '';
   return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
 }
 
