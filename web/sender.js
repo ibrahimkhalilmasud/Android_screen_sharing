@@ -8,6 +8,7 @@ const stopBtn = document.getElementById('stop');
 let ws;
 let stream;
 const pcs = new Map();
+const receiverIds = new Set();
 
 function setStatus(status) {
   statusEl.textContent = status;
@@ -61,15 +62,23 @@ connectBtn.onclick = () => {
 
     if (msg.type === 'peers') {
       log(`Peers in room: ${msg.peers.length}`);
+      receiverIds.clear();
+      for (const peer of msg.peers.filter((p) => p.role === 'receiver')) {
+        receiverIds.add(peer.clientId);
+      }
       if (stream) {
-        for (const peer of msg.peers.filter((p) => p.role === 'receiver')) {
-          await setupPeer(peer.clientId);
+        for (const receiverId of receiverIds) {
+          await setupPeer(receiverId);
         }
       }
     }
 
     if (msg.type === 'peer_joined' && msg.role === 'receiver' && stream) {
+      receiverIds.add(msg.clientId);
       await setupPeer(msg.clientId);
+    }
+    if (msg.type === 'peer_joined' && msg.role === 'receiver' && !stream) {
+      receiverIds.add(msg.clientId);
     }
 
     if (msg.type === 'signal') {
@@ -89,6 +98,7 @@ connectBtn.onclick = () => {
     }
 
     if (msg.type === 'peer_left') {
+      receiverIds.delete(msg.clientId);
       pcs.get(msg.clientId)?.close();
       pcs.delete(msg.clientId);
       log(`Peer left: ${msg.clientId}`);
@@ -121,6 +131,9 @@ startBtn.onclick = async () => {
     for (const receiverId of receivers) {
       pcs.get(receiverId)?.close();
       pcs.delete(receiverId);
+    }
+    for (const receiverId of receiverIds) {
+      await setupPeer(receiverId);
     }
 
     log('Screen capture started');

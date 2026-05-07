@@ -41,7 +41,6 @@ async function rebuildPeerConnection() {
 }
 
 connectBtn.onclick = async () => {
-  await rebuildPeerConnection();
   const room = roomEl.value.trim();
   if (!room) return;
 
@@ -69,7 +68,10 @@ connectBtn.onclick = async () => {
 
     if (msg.type === 'peer_left' && msg.clientId === senderId) {
       senderId = null;
-      await rebuildPeerConnection();
+      if (pc) {
+        pc.close();
+        pc = null;
+      }
       setStatus('waiting_for_sender');
       log('Sender disconnected');
     }
@@ -77,6 +79,9 @@ connectBtn.onclick = async () => {
     if (msg.type === 'signal') {
       senderId = msg.from;
       const payload = msg.payload;
+      if (!pc) {
+        await rebuildPeerConnection();
+      }
 
       if (payload.type === 'offer') {
         await pc.setRemoteDescription(payload.sdp);
