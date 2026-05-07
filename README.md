@@ -1,138 +1,64 @@
-# Android_screen_sharing
+# LAN Screen Share (Free, Wi-Fi First)
 
+This repository now provides a **free, self-hosted local-network screen sharing baseline** designed to support:
+- Android sender (native scaffold)
+- iPhone sender (native scaffold)
+- Browser receiver (ready)
 
-Step 1:
+No paid service is required for the LAN workflow.
 
-You need to install scoop
+## What is implemented now
+- Local signaling server: `server/index.js`
+- Browser receiver: `web/receiver.html`
+- Browser sender for validation/demo: `web/sender.html`
+- Android sender scaffold notes: `apps/android/README.md`
+- iOS sender scaffold notes: `apps/ios/README.md`
 
-use this commmend inside you windows power shell.
-or follow this link (official link)
+## Why this replaces the old approach
+The previous repository only documented `scrcpy`/`sndcpy` setup and did not support iPhone screen sharing in the same architecture.
 
-https://scoop.sh/
+This redesign uses a shared, open, self-hosted WebRTC signaling model so Android and iOS can target the same receiver flow.
 
-*****************************************************
-Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+## Quick start (LAN)
 
-# or shorter
+### 1) Install dependencies
+```bash
+npm install
+```
 
-iwr -useb get.scoop.sh | iex
+### 2) Start server
+```bash
+npm start
+```
 
-*****************************************************
+Server starts on `http://0.0.0.0:8080`.
 
-inside here
+### 3) Open receiver
+On the viewer device (same Wi-Fi), open:
+- `http://<your-computer-ip>:8080/receiver.html`
 
-	C:\Users\(UserName)\scoop
-	
-Noted if the folder dosent exsit create one inside
-your user Name it scoop.
+### 4) Open sender
+For immediate validation, open sender in a browser:
+- `http://<your-computer-ip>:8080/sender.html`
+- Enter the same room ID on both pages
+- Click **Connect** on both pages
+- Click **Start screen share** on sender
 
+## Android and iPhone implementation path
+- Android native sender plan: `apps/android/README.md`
+- iOS native sender plan: `apps/ios/README.md`
 
-Step 2:
+These are scaffolds for native implementation with MediaProjection (Android) and ReplayKit (iOS), both targeting the same free local signaling model.
 
-Now Install the video share part (https://github.com/Genymobile/scrcpy/)
+## Current limitations
+- LAN/same Wi-Fi only by default.
+- Browser sender support depends on browser-level screen capture capabilities.
+- Native Android/iOS senders are scaffolded but not fully implemented yet.
 
-create scrcpy as a new inside C:\
- 
- 
- 
-For sharing screen we need to install scrcpy
+## Validation checklist
+- Browser sender → browser receiver on same room
+- Reconnect by refreshing receiver
+- Stop/start share from sender
 
-Try to install this script from the link below
-
-
-#### this is why we need to install scoop
-
-*****************************************************
-scoop install scrcpy
-scoop install adb    # if you don't have it yet
-*****************************************************
-
-	
-It is also available in Chocolatey (https://chocolatey.org/):
-
-## Install with cmd.exe
-Run the following command:
-*****************************************************
-@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-
-
-## Install with powershell.exe
-
-Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-
-choco install scrcpy
-choco install adb    # if you don't have it yet
-
-
-*****************************************************
-Run
-Plug an Android device, and execute:
-
-scrcpy
-
-or use this 
-
-scrcpy -s <serial>
-
-hit enter
-
-It accepts command-line arguments, listed by:
-
-scrcpy --help
-*****************************************************
-
-
-Step 3: 
-
-Now lets get the audio part
-
-for that we need to install ****sndcpy****
-
-*****************************************************
-Create a folder
-
-C:\sndcpy
-*****************************************************
-
-Donwload this and extract
-
-https://github.com/rom1v/sndcpy
-
-Now send the APK file you your android device
-
-
-Step 4:
-
-Requirements
-
-## The Android device requires at least Android 10.
-## VLC must be installed on the computer.
-
-
-use this in the terminal to find your device 
-
-If several devices are connected (listed by adb devices):
-adb devices
-
-
-Plug an Android 10 device with USB debugging enabled, and execute:
-*****************************************************
-cd .\sndcpy\
-*****************************************************
-noted use this commend do inside the folder
-
-*****************************************************
-cd .. (use this commend in terminal you go back to the root folder) 
-
-*****************************************************
-./sndcpy
-
-
-./sndcpy <serial>  # replace <serial> by the device serial
-*****************************************************
-Or
-
-sndcpy -s <serial>
-
-
-
+## Architecture
+See: `docs/ARCHITECTURE.md`

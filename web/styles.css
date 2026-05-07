@@ -1,0 +1,64 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  background: #1f2937;
+}
+
+input,
+button,
+select {
+  font: inherit;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  background: #111827;
+  color: #f9fafb;
+}
+
+button {
+  cursor: pointer;
+}
+
+video {
+  width: 100%;
+  max-height: 70vh;
+  background: black;
+  border-radius: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #111827;
+}
+
+#log {
+  white-space: pre-wrap;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
